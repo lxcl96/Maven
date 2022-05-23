@@ -191,6 +191,7 @@ Maven默认生成的工程，对JUnit依赖的是较低的3.8.1版本，我们�
   <modelVersion>4.0.0</modelVersion>
 
   <!--gav坐标 -->
+  <!-- 打包号的文件放到 D:\Maven\repository\com\ly\maven\pro01-maven-java\1.0-SNAPSHOT\pro01-maven-java-1.0-SNAPSHOT.jar路径下了-->
   <groupId>com.ly.maven</groupId> 
   <artifactId>pro01-maven-java</artifactId>
   <version>1.0-SNAPSHOT</version>
@@ -299,3 +300,239 @@ mvn test-compile //测试程序编译
 mvn test //测试报告存放目录为：target/surefire-reports
 ```
 
+## 5、打包操作
+
+```java
+mvn package //打包的结果放在target目录下
+```
+
+## 6、安装命令
+
+就是把打包好的jar/war包（包括对应的工程pom文件）放到Maven的本地仓库中 (***根据坐标一级一级去找***)
+
+```java
+mvn install
+```
+
+# 实验四：创建Maven版的Web工程
+
+## 1、创建
+
+创建Web工程需要额外的命令（注意jar工程下不能再创建war工程）：
+
+```java
+//固定的命令
+mvn archetype:generate -D archetypeGroupId=org.apache.maven.archetypes -D archetypeArtifactId=maven-archetype-webapp -D archetypeVersion=1.4
+```
+
+然后在提示中输入：
+
+`groupId：com.ly.maven`
+
+`artifactId：pro02-maven-web`
+
+`version：1.0-SNAPSHOT`
+
+然后就会在项目工程下生成对于的pom.xml文件，对于的web工程目录结构图如下：
+
+![](web工程目录结构.jpg)
+
+
+
+## 2、使用
+
+### 2.1、创建一个servlet使用
+
+首先dos窗口创建的web工程目录不全，需要自收到创建如：src/main/java/com/ly/maven
+
+![](web工程目录结构（全）.jpg)
+
+编写servlet类，在web.xml中配置访问路径
+
+### 2.2、导入web工程依赖的jar包如servlet-api
+
+可以去此网站：https://mvnrepository.com/查看程序的详细依赖，然后找到合适的，复制dependency依赖信息，复制到工程路径下的pom.xml文件中的dependencies标签下
+
+### 2.3、打包
+
+```java
+mvn clean package install 
+```
+
+### 2.4、将war包放到tomcat下（webapps目录下）部署运行
+
+
+
+# 实验五：让Web工程依赖Java工程
+
+​	1、在第二个web项目的pom.xml文件中dependency标签内配置第一个Java项目坐标
+
+```xml
+<dependency>
+    <!-- 通过被指定工程的坐标完成依赖-->
+    <groupId>com.ly.maven</groupId>
+    <artifactId>pro01-maven-java</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <!-- scope默认值就是compile，所以写不写都可以-->
+    <scope>compile</scope>
+</dependency>
+```
+
+​	2、在web工程中编写测试代码，方便使用被依赖的Java工程（自己创建的）
+
+```java
+//补充创建文件夹  web工程路径/src/test/java/com/ly/maven/
+```
+
+​	3、确认web工程的pom.xml中写明了依赖junit测试类
+
+​	4、创建测试类，放在 `web工程路径/src/test/java/com/ly/maven/`目录下
+
+​	5、在Web工程中执行命令
+
+`因为Web工程中没有Calculator这个类，但是如果可以使用就说明依赖成功第一个Java工程中jar包`
+
+```java
+mvn test  //查看测试类是否成功运行
+    
+//如果打完包不带版本号  去掉pom.xml中的finalName标签
+mvn package //打完包就可以看看war包内WEB-INF的lib目录下有没有将这个依赖Java工程jar包加入其内
+    
+mvn dependency:list //查看当前工程的所有依赖列表，包含我们自己的Java工程
+mvn dependency:tree //树形结构列出层次依赖
+```
+
+
+
+# 实验六：测试依赖的范围
+
+## 1、依赖的范围
+
+标签的位置即：dependencies/dependency/scope
+
+scope可选值：compile、test、provided、system、runtime、import
+
+## 2、对比
+
+即以compile/test/provided分别引入依赖 对这四个属性是否有效？（***下面均指引入依赖工程目录下***）
+
+约定：
+
+Java工程：pro01-maven-java==》被引入的工程
+
+Web工程：pro02-maven-web ==》引入的工程
+
+==下面是依赖类型为test的jar包，不是jar包中的test，jar中的test目总是录不会被包含的，因为你打包时就不包含==
+
+|                 | 引入的工程main目录（空间） | 引入的工程test目录（空间） | 开发过程Idea是否有提示（时间） | 部署，即是否会被打入到war包中（时间） |
+| :-------------- | -------------------------- | -------------------------- | ------------------------------ | ------------------------------------- |
+| 依赖类型compile | 可用                       | 可用                       | 有                             | 会                                    |
+| 依赖类型test    | 不可用                     | 可用                       | 有                             | 不会                                  |
+| provided        | 可用                       | 可用                       | 有                             | 不会                                  |
+
+> 例如：Java工程：pro01-maven-java引入到Web工程：pro02-maven-web中，scope=compile，我们要看的就是pro02-maven-web中main中代理是不是能用pro01-maven-java中代码？
+>
+> 如果能用就是有效，如果不能用就是无效
+
+
+
+# 实验七：依赖传递性
+
+## 1、概念
+
+A依赖B，B依赖C，那么如果在A中没有配置依赖C，A中能不能直接使用C？
+
+## 2、传递的原则
+
+在A依赖B,B依赖C的前提下，A能不能直接使用C取决于B中对C的依赖程度为：compile/test/provided?
+
++ B依赖C使用的范围为compile时，A可以直接使用C
++ B依赖C使用的范围为test或provided时，A不可以直接使用C（如junit），因此只能在A中pom文件中自己配置C的依赖
+
+==如果某个工程更新了pom中的依赖，则必须将这个工程重新打包安装。否则只是在本地的工作目录中而不是本地仓库，更别说中央仓库了。==
+
+> 例如：工程C中更新了依赖，则必须将工程C mvn clean install 重新安装到本地仓库/中央仓库，这时A或者是依赖A的工程才能列出这个依赖(mvn dependency:list)
+
+
+
+# 实验八：测试依赖的排除
+
+如果A依赖B，B依赖C（1.0版本），并且A依赖D，D依赖C（2.0版本）这个时候如果需要的时2.0版本，防止开发时选错（或者两个版本的冲突），则需要在A的pom文件中排除掉B中的依赖C（1.0版本）。
+
+## 配置方式
+
+pom.xml文件中dependencies标签内加上exclusions标签，exclusions内部配置exclusion标签。和dependency和dependencies标签的关系一样。
+
+***pro02-maven-webz工程中排除pro01-maven-java工程中的spring-core依赖***
+
+==注意 是放在dependency标签内部，即引入依赖时同时排除==
+
+==仅当前pom文件的工程有效果，对依赖的直接依赖不会有关系（因为没改它的pom文件）==
+
+```xml
+<dependency>
+	<groupId>com.atguigu.maven</groupId>
+	<artifactId>pro01-maven-java</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<scope>compile</scope>
+	<!-- 使用excludes标签配置依赖的排除	-->
+	<exclusions>
+		<!-- 在exclude标签中配置一个具体的排除 -->
+		<exclusion>
+			<!-- 指定要排除的依赖的坐标（不需要写version） -->
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</exclusion>
+	</exclusions>
+</dependency>
+```
+
+
+
+# 实验九：继承
+
+## 1、概念
+
+Maven工程之间，工程A继承工程B
+
+工程A：子工程
+
+工程B：父工程
+
+Maven继承本质上就是pom.xml文件的继承
+
+## 2、作用
+
+在父工程中统一管理项目中的依赖信息，具体来说就是管理依赖信息的版本
+
+
+
+它的背景是：
+
++ 对一个比较大型的项目进行模块拆分
++ 一个project下面，创建很多个module
++ 每一个module都需要配置自己的依赖信息
+
+
+
+它背后的需求是：
+
++ 在每一个module中维护各自的依赖信息很容易发生出入，不利于统一管理
++ 使用同一个框架内的不同jar包，他们应该是同一个版本，所以整个项目中使用的框架版本需要统一
++ 使用框架时所需要的jar包组合（或依赖信息组合）需要长时间的摸索和调试，最终才还能确定下来。希望这个依赖信息也能在新项目中继续使用，就需要保存下来。
+
+通过在父工程中为整个项目维护依赖信息的组合既**保证了整个项目使用规范、准确的 jar 包**；又能够将**以往的经验沉淀**下来，节约时间和精力
+
+## 2、操作
+
+### 2.1、创建父工程
+
+创建一个Java工程：
+
+`groupId:com.ly.maven`
+
+`artifactId:pro03-maven-parent`
+
+`version:1.0-SNAPSHOT`
+
+创建完成后，修改父工程的打包方式为：==pom==，为了给子工程继承
