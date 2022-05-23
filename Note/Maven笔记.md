@@ -525,7 +525,7 @@ Maven继承本质上就是pom.xml文件的继承
 
 ## 2、操作
 
-### 2.1、创建父工程
+### 2.1、创建父工程（一般是不写代码的，仅仅作为配置）
 
 创建一个Java工程：
 
@@ -536,3 +536,96 @@ Maven继承本质上就是pom.xml文件的继承
 `version:1.0-SNAPSHOT`
 
 创建完成后，修改父工程的打包方式为：==pom==，为了给子工程继承
+
+```xml
+<groupId>com.ly.maven</groupId>
+<artifactId>pro03-maven-parent</artifactId>
+<version>1.0-SNAPSHOT</version>
+<!-- 只有打包方式为pom的才能作为父工程-->
+<packaging>pom</packaging>
+```
+
+### 2.2、创建模块工程、
+
+模块工程类似于Idea中的Module，所以需要进入父工程pro03-maven-parent的根目录（即：D:\JavaWork\Maven\demoDos\pro03-maven-parent 和pom文件同级别），然后运行mvnarchetype:generate 来创建模块工程。
+
+假设我们创建三个子模块工程：
+
+| `groupId:com.ly.maven`          | `groupId:com.ly.maven`          | `groupId:com.ly.maven`          |
+| ------------------------------- | ------------------------------- | ------------------------------- |
+| `artifactId:pro04-maven-parent` | `artifactId:pro05-maven-parent` | `artifactId:pro06-maven-parent` |
+| `version:1.0-SNAPSHOT`          | `version:1.0-SNAPSHOT`          | `version:1.0-SNAPSHOT`          |
+
+![](父子工程目录.PNG)
+
+```xml
+<!-- 父工程pom文件多出来的-->
+<modules>  
+    <module>pro04-maven-module</module>
+    <module>pro05-maven-module</module>
+    <module>pro06-maven-module</module>
+</modules>
+
+
+<!-- 子工程pom文件多出来的-->
+<parent>
+    <!-- 子工程如果和父工程的groupId，version一样，则可以省略（我试了会报错的）-->
+    <groupId>com.ly.maven</groupId>
+    <artifactId>pro03-maven-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</parent>
+```
+
+***在父工程中配置依赖的统一管理***
+
+注意即使在父工程中添加了依赖，子工程的pom文件中不会自动生成依赖，==子工程需要具体使用哪一个依赖还是要明确配置。==
+
+```xml
+  <!-- 在父工程中统一管理依赖信息在project标签下，和module标签同级-->
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>4.0.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>4.0.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>4.0.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>4.0.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>4.0.0.RELEASE</version>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+***子工程中要声明要使用的依赖：***
+
+==注意：子工程可以配置父工程不存在的依赖，不是说只能从父工程的依赖范围取。但是为了规范，一般都是子工程pom依赖是父工程的子集==
+
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-core</artifactId>
+    <!-- 对于已经在父工程中进行了依赖的管理，子工程版本号可以写也可以不写。
+    如果不写：默认就是父工程中指定的版本
+    如果写：就采用子工程的声明版本
+    -->
+    <version>4.0.0.RELEASE</version>
+</dependency>
+```
+
