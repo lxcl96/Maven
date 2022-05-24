@@ -13,6 +13,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<!-- 自定义属性实现版本控制-->
+	<ly.spring.version>4.0.0.RELEASE</ly.spring.version>
   </properties>
 
   <dependencies>
@@ -24,6 +26,7 @@
     </dependency>
 	
   </dependencies>
+  <!-- 配置聚合--> 
  <modules>  
 		<module>pro04-maven-module</module>
 		<module>pro05-maven-module</module>
@@ -36,27 +39,27 @@
 			<dependency>
 			<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
-				<version>4.0.0.RELEASE</version>
+				<version>${ly.spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-beans</artifactId>
-				<version>4.0.0.RELEASE</version>
+				<version>${ly.spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-context</artifactId>
-				<version>4.0.0.RELEASE</version>
+				<version>${ly.spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-expression</artifactId>
-				<version>4.0.0.RELEASE</version>
+				<version>${ly.spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-aop</artifactId>
-				<version>4.0.0.RELEASE</version>
+				<version>${ly.spring.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

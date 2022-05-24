@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="pro03-module-java (2) (com.ly.maven)" />
+        <module name="pro04-module-web" />
+        <module name="pro04-maven-import-module" />
+        <module name="pro03-module-java (1)" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>
